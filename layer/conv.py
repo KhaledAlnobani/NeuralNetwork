@@ -22,16 +22,19 @@ class Conv2D:
         self.bias = np.zeros((1, 1, 1, self.num_filters))
         self.built = True
 
-    # Note: This implementation prioritizes clarity and educational value over performance.
-    # For production or large-scale use, consider optimizing with vectorized operations or libraries like CuDNN.
-        
+    
     def forward(self, x):  
+        """ Forward pass of convolutional layer (educational implementation)
+
+        Note: This implementation uses explicit loops for clarity in demonstrating the
+        convolution operation mechanics.
+        """
         if not self.built:
             self.build(x.shape)
             self.built = True
             
         self.input = x
-        batch_size, input_height, input_width, input_channels = x.shape
+        num_sample, input_height, input_width, input_channels = x.shape
         
         output_height = (input_height - self.filter_height + 2*self.padding) // self.stride + 1
         output_width = (input_width - self.filter_width + 2*self.padding) // self.stride + 1
@@ -39,9 +42,9 @@ class Conv2D:
         x_pad = np.pad(x, ((0,0), (self.padding, self.padding), 
                       (self.padding, self.padding), (0,0), 
                       ), mode='constant', constant_values=0)
-        z = np.zeros((batch_size, output_height, output_width, self.num_filters))
+        z = np.zeros((num_sample, output_height, output_width, self.num_filters))
         
-        for i in range(batch_size):
+        for i in range(num_sample):
             for h in range(output_height):
                 for w in range(output_width):
                     for f in range(self.num_filters):
@@ -58,11 +61,17 @@ class Conv2D:
         self.z = z
         return self.activation.forward(z)
     
+
     def backward(self, d_out, batch_size=None):
+        """      
+        Backward pass of convolutional layer (educational implementation)
+
+        Note: This implementation uses explicit loops for clarity in demonstrating the
+        convolution operation mechanics.
+        """
         d_out = self.activation.backward(self.z) * d_out
-        m, h_in, w_in, c_in = self.input.shape
-        self.filter_height, self.filter_width, _, _ = self.weights.shape
-        
+        num_samples,output_height,output_width,output_channels = d_out.shape
+
         dx = np.zeros_like(self.input)
         dw = np.zeros_like(self.weights)
         db = np.zeros_like(self.bias)
@@ -72,9 +81,9 @@ class Conv2D:
         dx_pad = np.pad(dx, ((0,0), (self.padding, self.padding), 
                            (self.padding, self.padding), (0,0)))
         
-        for i in range(m):
-            for h in range(d_out.shape[1]):
-                for w in range(d_out.shape[2]):
+        for i in range(num_samples):
+            for h in range(output_height):
+                for w in range(output_width):
                     for f in range(self.num_filters):
                         v_start = h * self.stride
                         v_end = v_start + self.filter_height

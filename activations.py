@@ -1,19 +1,11 @@
 import numpy as np
 
-<<<<<<< HEAD
 class Activation:
     def __init__(self, activation_type=None):
         if activation_type is None:
             self.activation_type = 'linear'
         else:
             self.activation_type = activation_type.lower()
-=======
-def ReLU_prime(x):
-    return (x > 0).astype(np.float32)
-def sigmoid(z):
-    z = np.clip(z, -50, 50)
-    return 1 / (1 + np.exp(-z + 1e-10))
->>>>>>> 7de3706 (final commit)
 
     def linear(self, x):
         return x

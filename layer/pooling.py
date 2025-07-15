@@ -8,20 +8,27 @@ class Pooling:
         self.stride = stride
         self.input = None
         self.mask = None  
-        
+
+
     def forward(self, x):
-        self.input = x
-        m, h_prev, w_prev, c_prev = x.shape
-        h_out = (h_prev - self.pool_size) // self.stride + 1
-        w_out = (w_prev - self.pool_size) // self.stride + 1
+        """
+        Forward pass of pooling layer (educational implementation)
         
-        output = np.zeros((m, h_out, w_out, c_prev))
+        Note: This implementation uses explicit loops for clarity in demonstrating the
+        pooling operation mechanics.
+        """
+        self.input = x
+        batch_size, input_height, input_width, input_channels = x.shape
+        output_height = (input_height - self.pool_size) // self.stride + 1
+        output_width = (input_width - self.pool_size) // self.stride + 1
+        
+        output = np.zeros((batch_size, output_height, output_width, input_channels))
         self.mask = np.zeros_like(x) if self.mode == "max" else None
         
-        for i in range(m):
-            for h in range(h_out):
-                for w in range(w_out):
-                    for c in range(c_prev):
+        for i in range(batch_size):
+            for h in range(output_height):
+                for w in range(output_width):
+                    for c in range(input_channels):
                         v_start = h * self.stride
                         v_end = v_start + self.pool_size
                         h_start = w * self.stride
@@ -39,31 +46,36 @@ class Pooling:
         
         return output
     
+
     def backward(self, d_out, batch_size=None):
-        if self.mask is None and self.mode == "max":
-            raise ValueError("Max pooling requires mask from forward pass")
-        
-        d_input = np.zeros_like(self.input)
+
+        """ 
+        Backward pass of pooling layer (educational implementation)
+
+        Note: This implementation uses explicit loops for clarity in demonstrating the
+        pooling operation mechanics.
+        """
+        dx = np.zeros_like(self.input)
         pool_area = self.pool_size * self.pool_size
         
-        m,h_out,w_out,c_out = d_out.shape
-        for i in range(m):
-            for h in range(h_out):
-                for w in range(w_out):
-                    for c in range(c_out):
+        num_samples,output_height,output_width,output_channels = d_out.shape
+        for i in range(num_samples):
+            for h in range(output_height):
+                for w in range(output_width):
+                    for c in range(output_channels):
                         v_start = h * self.stride
                         v_end = v_start + self.pool_size
                         h_start = w * self.stride
                         h_end = h_start + self.pool_size
                         
                         if self.mode == "max":
-                            d_input[i, v_start:v_end, h_start:h_end, c] += (
+                            dx[i, v_start:v_end, h_start:h_end, c] += (
                                 self.mask[i, v_start:v_end, h_start:h_end, c] * 
                                 d_out[i, h, w, c]
                             )
                         elif self.mode == "average":
-                            d_input[i, v_start:v_end, h_start:h_end, c] += (
+                            dx[i, v_start:v_end, h_start:h_end, c] += (
                                 d_out[i, h, w, c] / pool_area
                             )
         
-        return {'dx': d_input}  
+        return {'dx': dx}  

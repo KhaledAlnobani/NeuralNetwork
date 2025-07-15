@@ -54,13 +54,7 @@ class Sequential:
         
         self.optimizer.update(params, grads)
         
-        # for i, layer in enumerate(self.layers):
-        #     if hasattr(layer, 'weights'):
-        #         layer.weights = params[f'layer_{i}_w']
-        #     if hasattr(layer, 'bias'):
-        #         layer.bias = params[f'layer_{i}_b']
-
-
+       
 
     def _gradient_check(self, X, y, epsilon=1e-7):
         y_pred = self._forward(X)

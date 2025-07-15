@@ -7,11 +7,9 @@ import matplotlib.pyplot as plt
 def load_mnist_full():
     (X_train, y_train), (X_test, y_test) = mnist.load_data()
     
-    # Convert labels to one-hot encoding
     y_train = np.eye(10)[y_train]
     y_test = np.eye(10)[y_test]
     
-    # Normalize and reshape
     X_train = X_train.reshape(-1, 28, 28, 1).astype('float32') / 255.0
     X_test = X_test.reshape(-1, 28, 28, 1).astype('float32') / 255.0
     
